@@ -1,0 +1,85 @@
+---
+title: Project proposal
+author: Aishwarya Gupta, Nayeon Kwon, Yuxuan Chen (Yellow Echidna)
+format: html
+editor: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r}
+#| label: load-packages
+#| message: false
+library(tidyverse)
+```
+
+## Dataset
+
+Make sure to load the data and use inline code for some of this information.
+
+```{r}
+# Holiday movies: https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-12-12
+
+url <- "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-12-12/holiday_movies.csv"
+
+holiday_movies <- read.csv(url(url))
+
+```
+
+Our dataset includes CSV files about movies with holiday themes.
+
+holiday_movies.csv:
+
+-   This file contains detailed information about each movie, including identifiers, titles, release years, runtime, genres, ratings, vote counts, and boolean flags indicating the presence of specific holiday keywords in the title (like "Christmas," "Hanukkah," "Kwanzaa," and "holiday").
+
+-   The  'tconst' column is a unique alphanumeric identifier for each movie, typical for movie databases like IMDb.
+
+-   The 'title_type', 'primary_title', 'original_title', and 'simple_title'  fields provide different formats of the movie's title.
+    The 'title_type' shows the format of the title (movie, video, or tvMovie), 'primary_title' shows the promotional title, 'original_title' shows the original language title, and 'simple_title' contains titles for filtering and grouping.
+
+-   The 'year', 'runtime_minutes', 'average_rating', and 'num_votes' fields contain numerical data about the release year, movie duration, IMDb user rating, and the number of votes, respectively.
+
+-   The 'genres' field contains up to three genres associated with each movie.
+
+-   The 'christmas', 'hanukkah', 'kwanzaa', and 'holiday' fields are boolean (logical) indicators that reflect whether the movie's title contains particular holiday-related terms.
+
+**Reason for choosing this dataset:**
+
+Holidays actively work towards bringing people together - most recently seen through the Lunar New Year festival.
+Our team would like to shed light on the cultural penetration and global normalization of certain holidays through the lens of the film industry.
+Despite the team members' diverse backgrounds and varying holiday traditions, we discovered that the universal celebration of Christmas provides a shared cultural touchstone.
+By working with this dataset, we can explore how the representation of Christmas and other holidays in movies correlates with user engagement and ratings.
+This exploration will help us understand the movie industry's role in reinforcing or expanding the popularity of holidays like Christmas worldwide. 
+
+Additionally, we would like to understand whether movies associated with widely celebrated holidays receive more attention than movies related to less universally recognized holidays, as reflected in ratings and number of votes.
+We can also observe how holidays are commercialized and celebrated through film.
+Working on this dataset, we can keep the nuances of how holiday movies are rated and discussed across different cultures, potentially uncovering patterns that resonate with a global audience. 
+
+## Questions
+
+What's the average rating and counts of different movie genres across the decades, which genres are the most popular for each decade?
+
+How did Christmas, Hanukkah, and Kwanzaa movie distribution change over the years?
+If there was a rapid increase or decrease in any of the movies, was there an influence from the average rating change of the three holiday movies?
+
+## Analysis plan
+
+**Question 1:**
+
+We plan to answer the first question by utilizing variables, 'average_rating', 'genres', and 'year'.
+We will create a new variable for decades and group the data from 'year' accordingly.
+Then, we will calculate the average rating for each decade and find the number of movies in each genre within 'genres' for each decade.
+We will use stacked bar charts to visualize genre distribution over the decades and a line chart to visualize average ratings over decades.
+We plan to plot the two charts on top of each other, yet with interactivity, allowing each of the graphs to turn on & off for better visualization of trends.
+
+Along with the interactive visualization, we plan on employing multivariate regression analysis.
+The regression analysis will help quantify the relationship between the 'average_rating' of the movies and the popularity of 'genres' over the decades.
+We will work with the dependent variable of 'average_rating' and the independent variables of genre, decade (new variable), and 'movies_per_genre' (new variable).
+
+These analyses will provide us with patterns in genre shifts over decades that may correlate with major cultural or global events, highlighting the cultural influence on the movie industry.
+
+**Question 2:** We plan to answer the second question by utilizing variables, 'christmas', 'hanukkah', 'kwanzaa', 'year', and 'average_rating'.
+To add more depth, we will also incorporate 'num_votes' into our analysis.
+This will be done by calculating the weighted average, where ratings from movies with more votes have more influence.
+We will analyze the trend by counting the number of each holiday movie over the years by combining them into a single multi-axis line chart, where on the x-axis we have years and the number of movies on the primary y-axis and average ratings on the secondary y-axis.
+These axes will allow for a direct visual comparison between the number of movies released and their average ratings over the same period.

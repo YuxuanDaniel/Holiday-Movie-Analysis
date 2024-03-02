@@ -1,0 +1,327 @@
+---
+title: Holiday Movies & Their Changes
+author: Yellow Echidna <br> Nayeon Kwon, Aishwarya Gupta, Yuxuan Chen
+date: 2/29/2024
+format: revealjs
+execute:
+  fig-width: 7
+  fig-asp: 0.618
+  fig-retina: 2
+  dpi: 150
+  fig-align: center
+  out-width: 80%
+knitr:
+  opts_chunk:
+    fig.showtext: true
+---
+
+## Introduction
+
+Dataset we used: holiday_movies.csv
+
+::: {.nonincremental}
+- identifiers
+- titles
+- release years
+- runtime
+- genres
+- ratings
+- vote counts
+- boolean flags for specific holiday keywords in the title ("Christmas," "Hanukkah," "Kwanzaa," and "holiday")
+:::
+
+# Question 1
+
+## Introduction
+
+What's the average rating and counts of different holiday movie genres across the decades, and which genres are the most popular for each decade?
+
+## Approach
+::: {.nonincremental}
+- Current Variables: 'average_rating', 'genres', and 'year'
+- New Variables: decades (grouped from 'year'), average rating, number of movies (from 'genres')
+
+...
+
+- Stacked bar charts --> Visualize genre distribution over the decades
+- Line chart --> Visualize average ratings over decades
+- Faceted charts --> Visualize individual genres
+:::
+
+## Analysis
+
+::: {.panel-tabset}
+### Stacked bar chart
+```{r}
+#| fig-width: 20
+#| fig-height: 75
+
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(caret)
+library(broom)
+library(plotly)
+
+url <- "https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-12-12/holiday_movies.csv"
+
+holiday_movies <- read.csv(url(url))
+
+holiday_movies_q1 <- holiday_movies |>
+  mutate(
+    decade = 10 * (year %/% 10),  
+    genre_list = strsplit(as.character(genres), ",\\s*")
+  )
+
+
+# Count the number of movies per genre for each decade
+genre_count_decade <- holiday_movies_q1 |>
+  unnest(genre_list) |>
+  group_by(decade, genre_list) |>
+  summarise(count = n())
+
+# Calculate the average rating for each genre within each decade
+genre_rating_decade <- holiday_movies_q1 |>
+  unnest(genre_list) |>
+  group_by(decade, genre_list) |>
+  summarise(average_rating = mean(average_rating, na.rm = TRUE))
+
+# Visualize the genre distribution over the decades with a stacked bar chart
+ggplot(genre_count_decade, aes(x = as.factor(decade), y = count, fill = genre_list)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(
+    title = "Genre distribution for each decade",
+    x = "Decade", y = "Number of movies", 
+    fill = "Genre"
+    ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.title.position = "plot"
+    )
+```
+
+### Facet Bar
+```{r}
+#| fig-width: 20
+#| fig-height: 75
+
+# Facet wrap for each genre
+ggplot(genre_count_decade, aes(x = as.factor(decade), y = count, fill = genre_list)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  theme_minimal() +
+  facet_wrap(facets = vars(genre_list)) +
+  scale_y_continuous() +
+  labs(
+    title = "Genre distribution for each decade",
+    x = "Decade", y = "Number of movies", 
+    fill = "Genre"
+    ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 5),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.title.position = "plot"
+    )
+```
+
+### Line Chart
+```{r}
+#| fig-width: 20
+#| fig-height: 75
+
+# Visualize average ratings over decades with a line chart
+ggplot(genre_rating_decade, aes(x = as.factor(decade), y = average_rating, group = genre_list, color = genre_list)) +
+  geom_line() +
+  theme_minimal() +
+  labs(
+    title = "Average rating change for each decade",
+    x = "Decade", y = "Average Rating",
+    color = "Genre"
+    ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.title.position = "plot"
+        )
+```
+
+
+### Facet Line
+```{r}
+#| fig-width: 20
+#| fig-height: 75
+
+# Facet wrap each average rating line
+ggplot(genre_rating_decade, aes(x = as.factor(decade), y = average_rating, group = genre_list, color = genre_list)) +
+  geom_line() +
+  theme_minimal() +
+  facet_wrap(facets = vars(genre_list)) +
+  scale_y_continuous() +
+  labs(
+    title = "Average rating change for each genre",
+    x = "Decade", y = "Average Rating",
+    color = "Genre"
+    ) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 5),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.title.position = "plot",
+    legend.position = ""
+        )
+```
+:::
+
+## Discussion
+
+:::: {.columns}
+
+::: {.column width="20%"}
+Count
+
+Comedy
+Drama
+Comedy
+Drama
+Drama
+Family
+Family
+Family
+Comedy
+Comedy
+Romance
+:::
+
+::: {.column width="20%"}
+Decades 
+
+1920s
+1930s
+1940s
+1950s
+1960s
+1970s
+1980s
+1990s
+2000s
+2010s
+2020s
+:::
+
+::: {.column width="20%"}
+Avg Rating
+
+Comedy
+Family
+Music
+Family
+Animation
+Music
+History
+War   
+War
+Biography
+Documentary
+:::
+
+::::
+
+# Question 2
+
+## Introduction
+
+How did Christmas, Hanukkah, and Kwanzaa movie distribution change over the years? How different are their average ratings?
+
+## Approach
+
+::: {.nonincremental}
+- Variables: 'christmas', 'hanukkah', 'kwanzaa', 'year', and 'average_rating'.
+
+...
+
+- Line chart --> Visualize each holiday's movie change over years / compare trends easily
+- Bar chart --> Visualize average rating per holiday / straightforward comparison
+:::
+
+## Analysis
+
+```{r}
+#| fig-width: 20
+#| fig-height: 30
+
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+
+holiday_movies_line <- holiday_movies %>%
+  mutate(across(c(christmas, hanukkah, kwanzaa), as.numeric)) %>%
+  group_by(year) %>%
+  summarise(
+    christmas_movies = sum(christmas),
+    hanukkah_movies = sum(hanukkah),
+    kwanzaa_movies = sum(kwanzaa)
+  ) %>%
+  pivot_longer(cols = ends_with("_movies"), names_to = "holiday", values_to = "num_movies", names_prefix = "")
+
+line_plot <- ggplot(holiday_movies_line, aes(x = year, y = num_movies, color = holiday)) +
+  geom_line() +
+  labs(
+    title = "Holiday Movie Distribution Over Years",
+    x = "Year", y = "Number of Movies", 
+    color = "Holiday"
+    ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.title.position = "plot",
+    legend.position = "bottom"
+  )
+
+holiday_movies_bar <- holiday_movies %>%
+  pivot_longer(cols = c(christmas, hanukkah, kwanzaa), names_to = "holiday_type", values_to = "is_holiday") %>%
+  filter(is_holiday) %>%
+  group_by(holiday_type) %>%
+  summarise(average_rating = mean(average_rating, na.rm = TRUE))
+
+bar_plot <- ggplot(holiday_movies_bar, aes(x = holiday_type, y = average_rating, fill = holiday_type)) +
+  geom_bar(stat = "identity") +
+  labs(
+    title = "Average Ratings",
+    x = "Holiday", y = "Average Rating", 
+    fill = "Holiday") +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1") +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1, size = rel(0.9)),
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.title.position = "plot",
+    legend.position = ""
+  )
+
+grid.arrange(line_plot, bar_plot, ncol = 2, widths = c(5, 2))
+```
+
+## Discussion - Line plot
+
+Holiday Movie Distribution Over Years
+
+::: {.nonincremental}
+- Significant increase in Christmas movies & sharp rise in recent years
+- Relative scarcity for Hanukkah and Kwanzaa movies throughout the years
+- Stronger cultural or commercial emphasis on Christmas-themed content in the film industry
+:::
+
+## Discussion - Bar plot
+
+Average Ratings
+
+::: {.nonincremental}
+- Kwanzaa --> Hanukkah --> Christmas movies
+- Potential quality-over-quantity scenario (lesser-produced holiday movies receive more favorable reviews)
+- Potential of reflecting a niche audience's rating behavior
+:::
+
+## Q&A
+
+Thank you for listening! Any questions?
